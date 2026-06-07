@@ -1,11 +1,1291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Hello</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexoraAI — AI & Software Engineering Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=Fira+Code:wght@400;500&family=Cormorant+Garamond:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #04060d;
+  --bg2: #080d1a;
+  --surface: #0d1424;
+  --accent: #00f5c4;
+  --accent2: #7b5cf0;
+  --accent3: #ff4d6d;
+  --text: #e8eaf0;
+  --muted: #5a6280;
+  --border: rgba(0,245,196,0.12);
+  --glow: 0 0 40px rgba(0,245,196,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  font-size:16px;
+  line-height:1.7;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CURSOR */
+#cursor{
+  width:12px;height:12px;
+  background:var(--accent);
+  border-radius:50%;
+  position:fixed;top:0;left:0;
+  pointer-events:none;z-index:9999;
+  transition:transform .15s ease,background .2s;
+  mix-blend-mode:difference;
+}
+#cursor-ring{
+  width:40px;height:40px;
+  border:1.5px solid var(--accent);
+  border-radius:50%;
+  position:fixed;top:0;left:0;
+  pointer-events:none;z-index:9998;
+  transition:transform .4s cubic-bezier(.23,1,.32,1),opacity .3s;
+  opacity:.5;
+}
+body:hover #cursor-ring{opacity:.8;}
+
+/* CANVAS */
+#bg-canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:0;pointer-events:none;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 4rem;
+  background:rgba(4,6,13,0.7);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:padding .3s;
+}
+nav.scrolled{padding:.8rem 4rem;}
+.logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.8rem;font-weight:400;
+  color:var(--accent);
+  letter-spacing:.1em;
+  text-decoration:none;
+}
+.logo span{color:var(--text);}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{
+  color:var(--muted);font-size:.8rem;letter-spacing:.12em;
+  text-decoration:none;text-transform:uppercase;
+  font-family:'Outfit',sans-serif;font-weight:500;
+  transition:color .3s;position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;
+  width:0;height:1px;background:var(--accent);
+  transition:width .3s;
+}
+.nav-links a:hover{color:var(--accent);}
+.nav-links a:hover::after{width:100%;}
+.nav-cta{
+  background:transparent;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  padding:.6rem 1.4rem;
+  border-radius:4px;
+  font-family:'Outfit',sans-serif;
+  font-weight:600;
+  font-size:.78rem;letter-spacing:.14em;
+  text-transform:uppercase;
+  cursor:none;
+  transition:background .3s,color .3s,box-shadow .3s;
+  text-decoration:none;
+}
+.nav-cta:hover{
+  background:var(--accent);color:var(--bg);
+  box-shadow:0 0 30px rgba(0,245,196,.3);
+}
+
+/* HERO */
+#hero{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;
+  padding:8rem 2rem 4rem;
+  overflow:hidden;
+}
+.hero-inner{max-width:900px;}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:'Fira Code',monospace;
+  font-size:.72rem;color:var(--accent);
+  border:1px solid var(--border);
+  border-radius:100px;
+  padding:.4rem 1rem;
+  margin-bottom:2rem;
+  letter-spacing:.1em;
+  opacity:0;
+  animation:fadeUp .8s .2s forwards;
+}
+.hero-tag-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  animation:pulse 1.5s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+
+h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4rem,10vw,8.5rem);
+  font-weight:400;
+  line-height:.92;
+  letter-spacing:.04em;
+  margin-bottom:1.5rem;
+  opacity:0;
+  animation:fadeUp .9s .4s forwards;
+}
+h1 .line{display:block;}
+h1 .italic-accent{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(3.2rem,8vw,7rem);
+  letter-spacing:-.01em;
+  line-height:1;
+}
+h1 .gradient-text{
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 60%,var(--accent3) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:1.1rem;color:var(--muted);
+  max-width:600px;margin:0 auto 3rem;
+  font-weight:300;
+  font-family:'Outfit',sans-serif;
+  line-height:1.8;
+  letter-spacing:.01em;
+  opacity:0;
+  animation:fadeUp .9s .6s forwards;
+}
+.hero-actions{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+  opacity:0;
+  animation:fadeUp .9s .8s forwards;
+}
+.btn-primary{
+  background:var(--accent);color:var(--bg);
+  padding:.9rem 2.2rem;border-radius:5px;
+  font-family:'Outfit',sans-serif;font-weight:600;
+  font-size:.88rem;letter-spacing:.12em;text-transform:uppercase;
+  text-decoration:none;
+  transition:box-shadow .3s,transform .2s;
+  position:relative;overflow:hidden;
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent,rgba(255,255,255,.2),transparent);
+  transform:translateX(-100%);
+  transition:transform .5s;
+}
+.btn-primary:hover::before{transform:translateX(100%);}
+.btn-primary:hover{box-shadow:0 0 50px rgba(0,245,196,.5);transform:translateY(-2px);}
+.btn-outline{
+  border:1px solid var(--muted);color:var(--text);
+  padding:.9rem 2.2rem;border-radius:5px;
+  font-family:'Outfit',sans-serif;font-weight:600;
+  font-size:.88rem;letter-spacing:.12em;text-transform:uppercase;
+  text-decoration:none;
+  transition:border-color .3s,color .3s;
+}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+
+/* STATS STRIP */
+.stats-strip{
+  position:relative;z-index:1;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--border);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.stat-item{
+  background:var(--bg);
+  padding:2rem;text-align:center;
+  transition:background .3s;
+}
+.stat-item:hover{background:var(--surface);}
+.stat-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:3rem;font-weight:400;
+  letter-spacing:.06em;
+  color:var(--accent);display:block;
+}
+.stat-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-family:'Outfit',sans-serif;font-weight:500;}
+
+/* SECTIONS */
+section{position:relative;z-index:1;padding:7rem 4rem;}
+.section-tag{
+  font-family:'Fira Code',monospace;
+  font-size:.72rem;color:var(--accent);
+  letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:1rem;display:block;
+}
+.section-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2.5rem,5vw,4.5rem);
+  font-weight:400;letter-spacing:.06em;
+  line-height:1;margin-bottom:1.5rem;
+}
+.section-sub{color:var(--muted);font-size:1rem;max-width:560px;font-weight:300;font-family:'Outfit',sans-serif;letter-spacing:.01em;line-height:1.8;}
+
+/* SERVICES */
+#services{background:var(--bg);}
+.services-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5px;
+  background:var(--border);
+  border:1px solid var(--border);
+  margin-top:4rem;
+  border-radius:12px;
+  overflow:hidden;
+}
+.service-card{
+  background:var(--bg);
+  padding:2.5rem;
+  transition:background .4s;
+  position:relative;overflow:hidden;
+  cursor:none;
+}
+.service-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  transform:scaleX(0);
+  transition:transform .5s;
+}
+.service-card:hover::before{transform:scaleX(1);}
+.service-card:hover{background:var(--surface);}
+.service-icon{
+  width:48px;height:48px;margin-bottom:1.5rem;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);border-radius:8px;
+  font-size:1.4rem;
+  transition:border-color .3s,box-shadow .3s;
+}
+.service-card:hover .service-icon{border-color:var(--accent);box-shadow:var(--glow);}
+.service-card h3{
+  font-family:'Outfit',sans-serif;
+  font-size:1.05rem;font-weight:600;
+  margin-bottom:.7rem;letter-spacing:.01em;
+}
+.service-card p{font-size:.9rem;color:var(--muted);line-height:1.75;font-weight:300;}
+.service-tags{
+  display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.2rem;
+}
+.stag{
+  font-family:'Fira Code',monospace;
+  font-size:.65rem;color:var(--accent);
+  border:1px solid var(--border);
+  padding:.25rem .6rem;border-radius:3px;
+  letter-spacing:.06em;
+}
+
+/* HOW WE WORK */
+#process{background:var(--bg2);}
+.process-steps{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:2rem;margin-top:4rem;
+}
+.process-step{position:relative;padding-left:1.5rem;}
+.process-step::before{
+  content:'';position:absolute;left:0;top:8px;
+  width:1px;height:calc(100% - 16px);
+  background:linear-gradient(to bottom,var(--accent),transparent);
+}
+.step-num{
+  font-family:'Fira Code',monospace;
+  font-size:.68rem;color:var(--accent);
+  letter-spacing:.12em;margin-bottom:1rem;display:block;
+}
+.process-step h3{
+  font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:600;
+  margin-bottom:.7rem;letter-spacing:.01em;
+}
+.process-step p{font-size:.88rem;color:var(--muted);line-height:1.75;font-weight:300;}
+
+/* TECH STACK */
+#tech{background:var(--bg);}
+.tech-marquee-wrap{
+  overflow:hidden;margin-top:3rem;
+  mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+  -webkit-mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+}
+.tech-marquee{
+  display:flex;gap:1rem;
+  animation:marquee 20s linear infinite;
+  width:max-content;
+}
+.tech-marquee:hover{animation-play-state:paused;}
+@keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}
+}
+.tech-chip{
+  display:flex;align-items:center;gap:.6rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:.7rem 1.2rem;
+  white-space:nowrap;
+  font-family:'Fira Code',monospace;
+  font-size:.78rem;color:var(--text);
+  transition:border-color .3s;
+}
+.tech-chip:hover{border-color:var(--accent);}
+.tech-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* PORTFOLIO */
+#work{background:var(--bg2);}
+.work-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1.5rem;margin-top:4rem;
+}
+.work-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+  transition:transform .4s cubic-bezier(.23,1,.32,1),box-shadow .4s;
+  cursor:none;position:relative;
+}
+.work-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 30px 60px rgba(0,0,0,.5),0 0 0 1px rgba(0,245,196,.2);
+}
+.work-preview{
+  height:200px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  font-size:3rem;
+}
+.work-preview.p1{background:linear-gradient(135deg,#0d1424,#1a0d2e);}
+.work-preview.p2{background:linear-gradient(135deg,#0a1e0f,#0d2424);}
+.work-preview.p3{background:linear-gradient(135deg,#1e0d0d,#2e1a0d);}
+.work-preview.p4{background:linear-gradient(135deg,#0d1a1e,#0d0d2e);}
+.work-preview-glow{
+  position:absolute;width:100px;height:100px;border-radius:50%;
+  filter:blur(40px);opacity:.4;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-15px);}}
+.work-info{padding:1.5rem;}
+.work-info h3{font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:600;margin-bottom:.5rem;letter-spacing:.01em;}
+.work-info p{font-size:.88rem;color:var(--muted);font-weight:300;line-height:1.75;}
+.work-badge{
+  display:inline-block;margin-top:.8rem;
+  font-family:'Fira Code',monospace;font-size:.65rem;
+  color:var(--accent2);border:1px solid rgba(123,92,240,.3);
+  padding:.2rem .7rem;border-radius:3px;letter-spacing:.06em;
+}
+
+/* TESTIMONIALS */
+#testimonials{background:var(--bg);}
+.testi-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:1.5rem;margin-top:4rem;
+}
+.testi-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;padding:2rem;
+  transition:border-color .3s;
+}
+.testi-card:hover{border-color:rgba(0,245,196,.3);}
+.testi-quote{
+  font-size:1.8rem;color:var(--accent);
+  margin-bottom:1rem;line-height:1;
+}
+.testi-text{font-size:.92rem;color:var(--muted);line-height:1.8;font-style:italic;font-family:'Cormorant Garamond',serif;font-size:1.05rem;}
+.testi-author{
+  margin-top:1.5rem;display:flex;align-items:center;gap:.8rem;
+}
+.testi-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Outfit',sans-serif;font-weight:600;font-size:.85rem;
+}
+.testi-name{font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:600;letter-spacing:.01em;}
+.testi-role{font-size:.72rem;color:var(--muted);font-family:'Fira Code',monospace;letter-spacing:.06em;}
+
+/* PRICING */
+#pricing{background:var(--bg2);}
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1.5rem;margin-top:4rem;
+}
+.pricing-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;padding:2.5rem 2rem;
+  position:relative;transition:transform .3s,box-shadow .3s;
+}
+.pricing-card.featured{
+  border-color:var(--accent);
+  box-shadow:var(--glow);
+}
+.pricing-card:hover{transform:translateY(-6px);}
+.pricing-badge{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:var(--bg);
+  font-family:'Fira Code',monospace;font-size:.68rem;font-weight:500;
+  padding:.3rem 1rem;border-radius:100px;letter-spacing:.1em;white-space:nowrap;
+}
+.pricing-tier{font-family:'Fira Code',monospace;font-size:.72rem;color:var(--accent);letter-spacing:.14em;margin-bottom:1rem;display:block;}
+.pricing-price{
+  font-family:'Bebas Neue',sans-serif;font-size:3rem;font-weight:400;
+  letter-spacing:.06em;line-height:1;margin-bottom:.3rem;
+}
+.pricing-price span{font-size:.95rem;font-weight:300;color:var(--muted);font-family:'Outfit',sans-serif;letter-spacing:.01em;}
+.pricing-desc{font-size:.88rem;color:var(--muted);margin-bottom:2rem;font-family:'Outfit',sans-serif;font-weight:300;line-height:1.7;}
+.pricing-features{list-style:none;margin-bottom:2rem;}
+.pricing-features li{
+  font-size:.88rem;padding:.5rem 0;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.7rem;
+  font-family:'Outfit',sans-serif;font-weight:400;
+}
+.pricing-features li::before{content:'→';color:var(--accent);font-size:.8rem;}
+
+/* CTA */
+#cta{
+  background:var(--bg);
+  text-align:center;padding:8rem 4rem;
+}
+.cta-inner{
+  max-width:700px;margin:0 auto;
+  position:relative;
+}
+.cta-glow{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(0,245,196,.06),transparent 70%);
+  pointer-events:none;
+}
+#cta h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,6vw,5.5rem);
+  font-weight:400;letter-spacing:.06em;line-height:1;
+  margin-bottom:1.5rem;
+}
+#cta p{color:var(--muted);margin-bottom:2.5rem;font-family:'Outfit',sans-serif;font-weight:300;font-size:1rem;letter-spacing:.01em;}
+.cta-form{
+  display:flex;gap:.8rem;max-width:480px;margin:0 auto;
+}
+.cta-input{
+  flex:1;background:var(--surface);
+  border:1px solid var(--border);border-radius:5px;
+  color:var(--text);padding:.9rem 1.2rem;
+  font-family:'Outfit',sans-serif;font-size:.95rem;
+  outline:none;transition:border-color .3s;
+}
+.cta-input:focus{border-color:var(--accent);}
+.cta-input::placeholder{color:var(--muted);}
+
+/* FOOTER */
+footer{
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  padding:4rem;
+}
+.footer-grid{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:3rem;margin-bottom:3rem;
+}
+.footer-brand .logo{display:block;margin-bottom:1rem;}
+.footer-brand p{font-size:.88rem;color:var(--muted);max-width:260px;font-family:'Outfit',sans-serif;font-weight:300;line-height:1.75;}
+.footer-col h4{
+  font-family:'Fira Code',monospace;font-size:.7rem;font-weight:500;
+  text-transform:uppercase;letter-spacing:.14em;
+  margin-bottom:1.2rem;color:var(--text);
+}
+.footer-col ul{list-style:none;}
+.footer-col ul li{margin-bottom:.6rem;}
+.footer-col ul li a{
+  font-size:.88rem;color:var(--muted);text-decoration:none;
+  font-family:'Outfit',sans-serif;font-weight:300;
+  transition:color .3s;
+}
+.footer-col ul li a:hover{color:var(--accent);}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid var(--border);padding-top:2rem;
+}
+.footer-bottom p{font-size:.75rem;color:var(--muted);font-family:'Fira Code',monospace;letter-spacing:.04em;}
+.footer-socials{display:flex;gap:1rem;}
+.social-link{
+  width:36px;height:36px;
+  border:1px solid var(--border);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);text-decoration:none;font-size:.85rem;
+  transition:border-color .3s,color .3s,background .3s;
+}
+.social-link:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,245,196,.08);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.23,1,.32,1),transform .8s cubic-bezier(.23,1,.32,1);}
+.revealed{opacity:1;transform:translateY(0);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+
+/* MOBILE */
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem;}
+  nav.scrolled{padding:.8rem 1.5rem;}
+  .nav-links{display:none;}
+  section{padding:5rem 1.5rem;}
+  .services-grid{grid-template-columns:1fr;}
+  .process-steps{grid-template-columns:1fr 1fr;}
+  .work-grid{grid-template-columns:1fr;}
+  .testi-grid{grid-template-columns:1fr;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .stats-strip{grid-template-columns:repeat(2,1fr);}
+  .cta-form{flex-direction:column;}
+  .footer-bottom{flex-direction:column;gap:1rem;}
+}
+</style>
 </head>
 <body>
-    <h1>Hello World 👋</h1>
-    <p>Your website is live!</p>
+
+<!-- Custom Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Animated BG Canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="logo">Nexora<span>AI</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#tech">Tech Stack</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#platforms">Platforms</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <a href="#cta" class="nav-cta">Start a Project</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">
+      <span class="hero-tag-dot"></span>
+      Available for new projects
+    </div>
+    <h1>
+      <span class="line">We Build</span>
+      <span class="line gradient-text italic-accent">Intelligent Systems</span>
+      <span class="line">That Scale.</span>
+    </h1>
+    <p class="hero-sub">NexoraAI is a freelance-first AI & software engineering agency delivering production-grade chatbots, Shopify stores, automation pipelines, and full-stack applications — fast.</p>
+    <div class="hero-actions">
+      <a href="#services" class="btn-primary">Explore Services</a>
+      <a href="#work" class="btn-outline">View Our Work</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat-item reveal">
+    <span class="stat-num" data-target="50">0</span>
+    <span class="stat-label">Projects Delivered</span>
+  </div>
+  <div class="stat-item reveal">
+    <span class="stat-num" data-target="30">0</span>
+    <span class="stat-label">Happy Clients</span>
+  </div>
+  <div class="stat-item reveal">
+    <span class="stat-num" data-target="109">0</span>
+    <span class="stat-label">% AI Demand YoY</span>
+  </div>
+  <div class="stat-item reveal">
+    <span class="stat-num" data-target="48">0</span>
+    <span class="stat-label">Hr Avg Turnaround</span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="reveal">
+    <span class="section-tag">// What We Do</span>
+    <h2 class="section-title">Services Built<br>for the AI Era</h2>
+    <p class="section-sub">From AI chatbots to high-converting Shopify stores — we engineer systems that grow your revenue.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-icon">🤖</div>
+      <h3>AI Integration Specialist</h3>
+      <p>Connect LLMs (OpenAI, Claude, Gemini) into your existing products. We build RAG pipelines, fine-tune models, and deploy autonomous agents that deliver measurable ROI.</p>
+      <div class="service-tags">
+        <span class="stag">LangChain</span><span class="stag">RAG</span><span class="stag">Vector DB</span><span class="stag">Agents</span>
+      </div>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">💬</div>
+      <h3>AI Chatbot Development</h3>
+      <p>Custom chatbots for customer support, lead gen, and internal tools. Multi-turn memory, tool use, structured output — built on your data and brand voice.</p>
+      <div class="service-tags">
+        <span class="stag">Voiceflow</span><span class="stag">Botpress</span><span class="stag">OpenAI</span><span class="stag">Webhook</span>
+      </div>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">⚡</div>
+      <h3>AI Automation Engineering</h3>
+      <p>Automate repetitive business workflows using AI + no-code/low-code tools. Multi-step pipelines, data extraction, scheduling — we cut your ops costs dramatically.</p>
+      <div class="service-tags">
+        <span class="stag">n8n</span><span class="stag">Make</span><span class="stag">Zapier AI</span><span class="stag">Python</span>
+      </div>
+    </div>
+    <div class="service-card reveal shopify-card" style="border-top:2px solid #95BF47;">
+      <div class="service-icon" style="border-color:rgba(149,191,71,0.3);">🛍️</div>
+      <h3>Shopify Store Development</h3>
+      <p>End-to-end Shopify store builds — theme customization, custom sections, conversion-optimized layouts, payment setup, and app integrations. Launch-ready in days.</p>
+      <div class="service-tags">
+        <span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Shopify</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Liquid</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Dawn</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Custom Theme</span>
+      </div>
+    </div>
+    <div class="service-card reveal shopify-card" style="border-top:2px solid #95BF47;">
+      <div class="service-icon" style="border-color:rgba(149,191,71,0.3);">🔌</div>
+      <h3>Shopify App & API Dev</h3>
+      <p>Custom Shopify apps, private integrations, and storefront API projects. We connect your store to ERPs, CRMs, shipping providers, and AI-powered recommendation engines.</p>
+      <div class="service-tags">
+        <span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Shopify API</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Node.js</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">GraphQL</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Webhooks</span>
+      </div>
+    </div>
+    <div class="service-card reveal shopify-card" style="border-top:2px solid #95BF47;">
+      <div class="service-icon" style="border-color:rgba(149,191,71,0.3);">📈</div>
+      <h3>Shopify AI & Growth Tools</h3>
+      <p>Supercharge your Shopify store with AI — product recommendation engines, AI-powered search, automated inventory alerts, and LLM-driven product descriptions at scale.</p>
+      <div class="service-tags">
+        <span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">AI Recs</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Klaviyo</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">OpenAI</span><span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Metafields</span>
+      </div>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">🧠</div>
+      <h3>ML Model Development</h3>
+      <p>End-to-end ML/DL model pipelines — data preprocessing, training, evaluation, and deployment. NLP, computer vision, time-series forecasting and more.</p>
+      <div class="service-tags">
+        <span class="stag">PyTorch</span><span class="stag">HuggingFace</span><span class="stag">scikit-learn</span>
+      </div>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">🌐</div>
+      <h3>Full-Stack Web Development</h3>
+      <p>React/Next.js frontends with Node, FastAPI or Django backends. AI-native apps with real-time streaming, auth, databases, and clean REST/GraphQL APIs.</p>
+      <div class="service-tags">
+        <span class="stag">Next.js</span><span class="stag">FastAPI</span><span class="stag">PostgreSQL</span><span class="stag">Docker</span>
+      </div>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">🚀</div>
+      <h3>MLOps & Deployment</h3>
+      <p>Get your AI models to production reliably. CI/CD pipelines, containerization, model monitoring, auto-scaling, and cloud deployments on AWS, GCP or Azure.</p>
+      <div class="service-tags">
+        <span class="stag">AWS</span><span class="stag">Kubernetes</span><span class="stag">MLflow</span><span class="stag">Docker</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="reveal">
+    <span class="section-tag">// How We Work</span>
+    <h2 class="section-title">From Brief to<br>Production — Fast</h2>
+    <p class="section-sub">A lean, transparent process designed for busy founders and engineering teams.</p>
+  </div>
+  <div class="process-steps">
+    <div class="process-step reveal">
+      <span class="step-num">01 / DISCOVER</span>
+      <h3>Discovery Call</h3>
+      <p>We map your problem, constraints, data, and success criteria in a focused 60-minute session. No fluff — just clarity.</p>
+    </div>
+    <div class="process-step reveal">
+      <span class="step-num">02 / ARCHITECT</span>
+      <h3>System Design</h3>
+      <p>We deliver a detailed technical proposal with architecture diagrams, stack choices, timeline, and fixed scope. You approve before we write a line of code.</p>
+    </div>
+    <div class="process-step reveal">
+      <span class="step-num">03 / BUILD</span>
+      <h3>Agile Engineering</h3>
+      <p>Weekly demos, daily async updates via Slack. You see real progress — not Gantt charts. Built with clean, documented, tested code.</p>
+    </div>
+    <div class="process-step reveal">
+      <span class="step-num">04 / DEPLOY</span>
+      <h3>Launch & Handoff</h3>
+      <p>Production deployment, monitoring setup, documentation, and a handoff session. Ongoing retainer options available if you need us to stay.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="tech" style="padding-bottom:5rem;">
+  <div class="reveal">
+    <span class="section-tag">// Our Arsenal</span>
+    <h2 class="section-title">Technology Stack</h2>
+    <p class="section-sub">We pick the best tool for each job — not the most fashionable one.</p>
+  </div>
+  <div class="tech-marquee-wrap reveal">
+    <div class="tech-marquee" id="marquee">
+      <div class="tech-chip"><span class="tech-dot"></span>Python</div>
+      <div class="tech-chip"><span class="tech-dot"></span>TypeScript</div>
+      <div class="tech-chip"><span class="tech-dot"></span>LangChain</div>
+      <div class="tech-chip"><span class="tech-dot"></span>LlamaIndex</div>
+      <div class="tech-chip"><span class="tech-dot"></span>OpenAI API</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Claude API</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Gemini</div>
+      <div class="tech-chip"><span class="tech-dot" style="background:#95BF47;"></span>Shopify</div>
+      <div class="tech-chip"><span class="tech-dot" style="background:#95BF47;"></span>Liquid</div>
+      <div class="tech-chip"><span class="tech-dot" style="background:#95BF47;"></span>Shopify API</div>
+      <div class="tech-chip"><span class="tech-dot" style="background:#95BF47;"></span>Klaviyo</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Pinecone</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Weaviate</div>
+      <div class="tech-chip"><span class="tech-dot"></span>PostgreSQL</div>
+      <div class="tech-chip"><span class="tech-dot"></span>FastAPI</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Next.js</div>
+      <div class="tech-chip"><span class="tech-dot"></span>React</div>
+      <div class="tech-chip"><span class="tech-dot"></span>n8n</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Docker</div>
+      <div class="tech-chip"><span class="tech-dot"></span>AWS</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Kubernetes</div>
+      <div class="tech-chip"><span class="tech-dot"></span>MLflow</div>
+      <div class="tech-chip"><span class="tech-dot"></span>HuggingFace</div>
+      <div class="tech-chip"><span class="tech-dot"></span>PyTorch</div>
+      <!-- duplicate for seamless loop -->
+      <div class="tech-chip"><span class="tech-dot"></span>Python</div>
+      <div class="tech-chip"><span class="tech-dot"></span>TypeScript</div>
+      <div class="tech-chip"><span class="tech-dot"></span>LangChain</div>
+      <div class="tech-chip"><span class="tech-dot"></span>LlamaIndex</div>
+      <div class="tech-chip"><span class="tech-dot"></span>OpenAI API</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Claude API</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Gemini</div>
+      <div class="tech-chip"><span class="tech-dot" style="background:#95BF47;"></span>Shopify</div>
+      <div class="tech-chip"><span class="tech-dot" style="background:#95BF47;"></span>Liquid</div>
+      <div class="tech-chip"><span class="tech-dot" style="background:#95BF47;"></span>Shopify API</div>
+      <div class="tech-chip"><span class="tech-dot" style="background:#95BF47;"></span>Klaviyo</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Pinecone</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Weaviate</div>
+      <div class="tech-chip"><span class="tech-dot"></span>PostgreSQL</div>
+      <div class="tech-chip"><span class="tech-dot"></span>FastAPI</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Next.js</div>
+      <div class="tech-chip"><span class="tech-dot"></span>React</div>
+      <div class="tech-chip"><span class="tech-dot"></span>n8n</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Docker</div>
+      <div class="tech-chip"><span class="tech-dot"></span>AWS</div>
+      <div class="tech-chip"><span class="tech-dot"></span>Kubernetes</div>
+      <div class="tech-chip"><span class="tech-dot"></span>MLflow</div>
+      <div class="tech-chip"><span class="tech-dot"></span>HuggingFace</div>
+      <div class="tech-chip"><span class="tech-dot"></span>PyTorch</div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section id="work">
+  <div class="reveal">
+    <span class="section-tag">// Case Studies</span>
+    <h2 class="section-title">Selected Work</h2>
+    <p class="section-sub">Real projects. Real results. See what we've shipped for clients worldwide.</p>
+  </div>
+  <div class="work-grid">
+    <div class="work-card reveal">
+      <div class="work-preview p1">
+        <div class="work-preview-glow" style="background:var(--accent2);left:30%;top:30%;"></div>
+        🤖
+      </div>
+      <div class="work-info">
+        <h3>E-Commerce AI Support Bot</h3>
+        <p>Custom RAG-powered chatbot trained on 50k product catalog. Handles 80% of support tickets autonomously, saving $12k/month in agent costs.</p>
+        <span class="work-badge">LangChain · Pinecone · OpenAI · Voiceflow</span>
+      </div>
+    </div>
+    <div class="work-card reveal" style="border-color:rgba(149,191,71,0.25);">
+      <div class="work-preview" style="background:linear-gradient(135deg,#0d1a0d,#1a2e0d);">
+        <div class="work-preview-glow" style="background:#95BF47;left:45%;top:35%;"></div>
+        🛍️
+      </div>
+      <div class="work-info">
+        <h3>Shopify Fashion Store — 3× Conversion</h3>
+        <p>Full custom Shopify store for a BD-based fashion brand. Custom Liquid theme, AI product descriptions, Klaviyo flows, and Google/Meta pixel setup. Conversion rate tripled in 30 days.</p>
+        <span class="work-badge" style="color:#95BF47;border-color:rgba(149,191,71,0.3);">Shopify · Liquid · Klaviyo · OpenAI</span>
+      </div>
+    </div>
+    <div class="work-card reveal">
+      <div class="work-preview p2">
+        <div class="work-preview-glow" style="background:var(--accent);left:50%;top:40%;"></div>
+        ⚡
+      </div>
+      <div class="work-info">
+        <h3>Invoice Automation Pipeline</h3>
+        <p>End-to-end document processing pipeline using GPT-4o Vision + n8n. Reduced invoice processing time from 4 hours to 8 minutes per batch.</p>
+        <span class="work-badge">GPT-4o · n8n · Python · PostgreSQL</span>
+      </div>
+    </div>
+    <div class="work-card reveal" style="border-color:rgba(149,191,71,0.25);">
+      <div class="work-preview" style="background:linear-gradient(135deg,#121a09,#0e2010);">
+        <div class="work-preview-glow" style="background:#95BF47;left:40%;top:40%;"></div>
+        🔌
+      </div>
+      <div class="work-info">
+        <h3>Shopify × ERP Integration</h3>
+        <p>Custom private Shopify app syncing inventory, orders, and invoices between a Shopify store and SAP ERP in real time via webhooks and GraphQL Admin API.</p>
+        <span class="work-badge" style="color:#95BF47;border-color:rgba(149,191,71,0.3);">Shopify API · Node.js · GraphQL · SAP</span>
+      </div>
+    </div>
+    <div class="work-card reveal">
+      <div class="work-preview p3">
+        <div class="work-preview-glow" style="background:var(--accent3);left:40%;top:35%;"></div>
+        🧠
+      </div>
+      <div class="work-info">
+        <h3>Real Estate Price Predictor</h3>
+        <p>ML regression model with 94.2% accuracy, deployed as a FastAPI microservice with React dashboard. Used by 3 agencies in Dhaka.</p>
+        <span class="work-badge">XGBoost · FastAPI · React · AWS</span>
+      </div>
+    </div>
+    <div class="work-card reveal">
+      <div class="work-preview p4">
+        <div class="work-preview-glow" style="background:var(--accent2);left:35%;top:40%;"></div>
+        🌐
+      </div>
+      <div class="work-info">
+        <h3>SaaS Analytics Platform</h3>
+        <p>Multi-tenant Next.js + FastAPI platform with AI-generated insights, real-time dashboards, Stripe billing, and role-based access control.</p>
+        <span class="work-badge">Next.js · FastAPI · Stripe · Clerk Auth</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORMS -->
+<section id="platforms" style="background:var(--bg);padding:5rem 4rem;">
+  <div class="reveal">
+    <span class="section-tag">// Where to Find Us</span>
+    <h2 class="section-title">Hire Us On<br>Your Platform</h2>
+    <p class="section-sub">We're active on the world's top freelance and e-commerce platforms. Pick the one that works best for you.</p>
+  </div>
+  <div class="platforms-grid reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:3rem;">
+
+    <div class="platform-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;transition:transform .3s,box-shadow .3s;cursor:none;" onmouseenter="this.style.transform='translateY(-6px)';this.style.boxShadow='0 20px 50px rgba(0,0,0,.4)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;">
+        <div style="width:48px;height:48px;border-radius:10px;background:rgba(149,191,71,0.12);border:1px solid rgba(149,191,71,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🛍️</div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.06em;color:#95BF47;">Shopify</div>
+          <div style="font-family:'Fira Code',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.08em;">Partner Ecosystem</div>
+        </div>
+      </div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:1.2rem;font-family:'Outfit',sans-serif;font-weight:300;">Find our Shopify gigs on the Shopify Experts Marketplace — store builds, theme customization, app integrations, and AI-powered store upgrades.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.4rem;">
+        <span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Store Setup</span>
+        <span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">Theme Dev</span>
+        <span class="stag" style="color:#95BF47;border-color:rgba(149,191,71,0.25);">App Dev</span>
+      </div>
+      <a href="https://www.shopify.com/ppc/online-store" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;color:#95BF47;text-decoration:none;letter-spacing:.06em;text-transform:uppercase;">View on Shopify →</a>
+    </div>
+
+    <div class="platform-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;transition:transform .3s,box-shadow .3s;cursor:none;" onmouseenter="this.style.transform='translateY(-6px)';this.style.boxShadow='0 20px 50px rgba(0,0,0,.4)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;">
+        <div style="width:48px;height:48px;border-radius:10px;background:rgba(20,181,98,0.1);border:1px solid rgba(20,181,98,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">💼</div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.06em;color:#14b562;">Upwork</div>
+          <div style="font-family:'Fira Code',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.08em;">Top Rated Freelancer</div>
+        </div>
+      </div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:1.2rem;font-family:'Outfit',sans-serif;font-weight:300;">Hourly and fixed-price contracts for AI integration, full-stack development, ML model builds, and Shopify work. Best for longer engagements with milestone tracking.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.4rem;">
+        <span class="stag" style="color:#14b562;border-color:rgba(20,181,98,0.25);">AI / ML</span>
+        <span class="stag" style="color:#14b562;border-color:rgba(20,181,98,0.25);">Full-Stack</span>
+        <span class="stag" style="color:#14b562;border-color:rgba(20,181,98,0.25);">Shopify</span>
+      </div>
+      <a href="#" style="display:inline-flex;align-items:center;gap:.5rem;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;color:#14b562;text-decoration:none;letter-spacing:.06em;text-transform:uppercase;">View Profile →</a>
+    </div>
+
+    <div class="platform-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;transition:transform .3s,box-shadow .3s;cursor:none;" onmouseenter="this.style.transform='translateY(-6px)';this.style.boxShadow='0 20px 50px rgba(0,0,0,.4)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;">
+        <div style="width:48px;height:48px;border-radius:10px;background:rgba(26,181,135,0.1);border:1px solid rgba(26,181,135,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">⭐</div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.06em;color:#1ab587;">Fiverr</div>
+          <div style="font-family:'Fira Code',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.08em;">Level 2 Seller</div>
+        </div>
+      </div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:1.2rem;font-family:'Outfit',sans-serif;font-weight:300;">Productized gigs for fast turnaround — chatbot builds, Shopify store setups, automation scripts, and AI-powered features. Fixed price, clear deliverables.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.4rem;">
+        <span class="stag" style="color:#1ab587;border-color:rgba(26,181,135,0.25);">Chatbots</span>
+        <span class="stag" style="color:#1ab587;border-color:rgba(26,181,135,0.25);">Automation</span>
+        <span class="stag" style="color:#1ab587;border-color:rgba(26,181,135,0.25);">Shopify</span>
+      </div>
+      <a href="#" style="display:inline-flex;align-items:center;gap:.5rem;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;color:#1ab587;text-decoration:none;letter-spacing:.06em;text-transform:uppercase;">View Gigs →</a>
+    </div>
+
+    <div class="platform-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;transition:transform .3s,box-shadow .3s;cursor:none;" onmouseenter="this.style.transform='translateY(-6px)';this.style.boxShadow='0 20px 50px rgba(0,0,0,.4)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;">
+        <div style="width:48px;height:48px;border-radius:10px;background:rgba(0,119,181,0.12);border:1px solid rgba(0,119,181,0.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">in</div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.06em;color:#0077b5;">LinkedIn</div>
+          <div style="font-family:'Fira Code',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.08em;">Direct Outreach</div>
+        </div>
+      </div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:1.2rem;font-family:'Outfit',sans-serif;font-weight:300;">For enterprise clients and direct contracts — reach out via LinkedIn for custom scoping, NDAs, and team-based engagements without platform fees.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.4rem;">
+        <span class="stag" style="color:#0077b5;border-color:rgba(0,119,181,0.25);">Enterprise</span>
+        <span class="stag" style="color:#0077b5;border-color:rgba(0,119,181,0.25);">Retainer</span>
+        <span class="stag" style="color:#0077b5;border-color:rgba(0,119,181,0.25);">No Fees</span>
+      </div>
+      <a href="#" style="display:inline-flex;align-items:center;gap:.5rem;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;color:#0077b5;text-decoration:none;letter-spacing:.06em;text-transform:uppercase;">Connect →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="reveal">
+    <span class="section-tag">// Client Words</span>
+    <h2 class="section-title">What Clients Say</h2>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card reveal">
+      <div class="testi-quote">"</div>
+      <p class="testi-text">NexoraAI delivered our chatbot in 2 weeks, exactly on spec. Our support volume dropped 70% overnight. These guys are the real deal.</p>
+      <div class="testi-author">
+        <div class="testi-avatar">JK</div>
+        <div>
+          <div class="testi-name">James K.</div>
+          <div class="testi-role">Founder, ShopEase UK</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal">
+      <div class="testi-quote">"</div>
+      <p class="testi-text">The automation pipeline they built processes 500 invoices per day without a single error. ROI was positive in the first month.</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,var(--accent3),var(--accent2));">SR</div>
+        <div>
+          <div class="testi-name">Sofia R.</div>
+          <div class="testi-role">COO, Meridian Logistics</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal">
+      <div class="testi-quote">"</div>
+      <p class="testi-text">Clean code, excellent documentation, proactive communication. Working with NexoraAI felt like having a senior engineer on my team.</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,var(--accent),#0d2424);">MH</div>
+        <div>
+          <div class="testi-name">Marcus H.</div>
+          <div class="testi-role">CTO, DataVault Inc.</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal" style="border-color:rgba(149,191,71,0.25);">
+      <div class="testi-quote" style="color:#95BF47;">"</div>
+      <p class="testi-text">Our Shopify store was struggling at 0.8% conversion. NexoraAI rebuilt the theme, added AI-generated product copy, and wired up Klaviyo automations. We hit 2.9% in 3 weeks.</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:linear-gradient(135deg,#95BF47,#3d6e00);">NA</div>
+        <div>
+          <div class="testi-name">Nadia A.</div>
+          <div class="testi-role">Founder, Velvet & Thread (Shopify)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="reveal">
+    <span class="section-tag">// Transparent Pricing</span>
+    <h2 class="section-title">Simple, Fixed Packages</h2>
+    <p class="section-sub">No hidden costs. No scope creep surprises. Know exactly what you're getting before you pay.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal">
+      <span class="pricing-tier">STARTER</span>
+      <div class="pricing-price">$499 <span>/ project</span></div>
+      <p class="pricing-desc">Perfect for single-feature AI integrations or automation scripts.</p>
+      <ul class="pricing-features">
+        <li>1 AI feature / chatbot</li>
+        <li>Up to 2 weeks delivery</li>
+        <li>1 revision round</li>
+        <li>GitHub delivery</li>
+        <li>Basic documentation</li>
+      </ul>
+      <a href="#cta" class="btn-outline" style="display:block;text-align:center;">Get Started</a>
+    </div>
+    <div class="pricing-card featured reveal">
+      <div class="pricing-badge">MOST POPULAR</div>
+      <span class="pricing-tier">PROFESSIONAL</span>
+      <div class="pricing-price">$1,499 <span>/ project</span></div>
+      <p class="pricing-desc">Full-stack AI app or complex automation pipeline. Our most common engagement.</p>
+      <ul class="pricing-features">
+        <li>Full-stack AI application</li>
+        <li>RAG / Agent architecture</li>
+        <li>Up to 4 weeks delivery</li>
+        <li>3 revision rounds</li>
+        <li>Deployment included</li>
+        <li>30-day support</li>
+      </ul>
+      <a href="#cta" class="btn-primary" style="display:block;text-align:center;">Get Started</a>
+    </div>
+    <div class="pricing-card reveal">
+      <span class="pricing-tier">ENTERPRISE</span>
+      <div class="pricing-price">Custom</div>
+      <p class="pricing-desc">Long-term engagements, retainer teams, and complex multi-system AI platforms.</p>
+      <ul class="pricing-features">
+        <li>Dedicated engineer(s)</li>
+        <li>Monthly retainer model</li>
+        <li>Custom SLA & NDAs</li>
+        <li>Architecture consulting</li>
+        <li>Ongoing MLOps support</li>
+        <li>Priority Slack access</li>
+      </ul>
+      <a href="#cta" class="btn-outline" style="display:block;text-align:center;">Talk to Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <div class="cta-inner reveal">
+    <span class="section-tag" style="display:block;margin-bottom:1rem;">// Let's Build</span>
+    <h2>Ready to Ship<br><span class="gradient-text italic-accent">Your AI Product?</span></h2>
+    <p>Drop your email — we'll reply within 24 hours with a project scoping form. No sales pitch, just engineering talk.</p>
+    <div class="cta-form">
+      <input type="email" class="cta-input" placeholder="your@email.com" id="emailInput">
+      <a href="#" class="btn-primary" onclick="handleSubmit(event)">Send →</a>
+    </div>
+    <p id="cta-msg" style="margin-top:1rem;font-size:.85rem;color:var(--accent);display:none;">✓ Got it! We'll be in touch within 24 hours.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="logo">Nexora<span>AI</span></a>
+      <p>AI & software engineering agency and Shopify development studio. We build production-grade intelligent systems and high-converting stores for startups and scale-ups worldwide.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#services">AI Integration</a></li>
+        <li><a href="#services">Chatbot Dev</a></li>
+        <li><a href="#services">Automation</a></li>
+        <li><a href="#services">ML Models</a></li>
+        <li><a href="#services">Shopify Stores</a></li>
+        <li><a href="#services">Shopify Apps</a></li>
+        <li><a href="#services">Full-Stack</a></li>
+        <li><a href="#services">MLOps</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#process">How We Work</a></li>
+        <li><a href="#work">Case Studies</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Platforms</h4>
+      <ul>
+        <li><a href="https://www.shopify.com/ppc/online-store" target="_blank">Shopify Experts</a></li>
+        <li><a href="#">Upwork Profile</a></li>
+        <li><a href="#">Fiverr Gigs</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">GitHub</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 NexoraAI. All rights reserved. Based in Dhaka, Bangladesh.</p>
+    <div class="footer-socials">
+      <a href="#" class="social-link">in</a>
+      <a href="#" class="social-link">gh</a>
+      <a href="#" class="social-link">tw</a>
+      <a href="#" class="social-link">up</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* -------- CURSOR -------- */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.transform=`translate(${mx-6}px,${my-6}px)`;
+});
+(function animRing(){
+  rx+=(mx-rx-20)*.12;
+  ry+=(my-ry-20)*.12;
+  ring.style.transform=`translate(${rx}px,${ry}px)`;
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a,button,.service-card,.work-card,.testi-card,.pricing-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cursor.style.transform+=` scale(2.5)`;
+    ring.style.opacity='0';
+  });
+  el.addEventListener('mouseleave',()=>{
+    ring.style.opacity='.8';
+  });
+});
+
+/* -------- CANVAS PARTICLES -------- */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+
+class Particle{
+  constructor(){this.reset();}
+  reset(){
+    this.x=Math.random()*W;
+    this.y=Math.random()*H;
+    this.vx=(Math.random()-.5)*.3;
+    this.vy=(Math.random()-.5)*.3;
+    this.size=Math.random()*1.5+.3;
+    this.alpha=Math.random()*.5+.1;
+    this.color=Math.random()>.7?'0,245,196':'123,92,240';
+  }
+  update(){
+    this.x+=this.vx;this.y+=this.vy;
+    if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset();
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${this.color},${this.alpha})`;
+    ctx.fill();
+  }
+}
+for(let i=0;i<120;i++)particles.push(new Particle());
+
+/* Connection lines */
+function drawLines(){
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const d=Math.hypot(particles[i].x-particles[j].x,particles[i].y-particles[j].y);
+      if(d<120){
+        ctx.beginPath();
+        ctx.strokeStyle=`rgba(0,245,196,${.12*(1-d/120)})`;
+        ctx.lineWidth=.5;
+        ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+/* Floating orbs */
+const orbs=[
+  {x:.2,y:.3,r:200,c:'0,245,196',a:.04,sp:.0008},
+  {x:.8,y:.7,r:250,c:'123,92,240',a:.03,sp:.0012},
+  {x:.5,y:.5,r:180,c:'255,77,109',a:.025,sp:.001},
+];
+let t=0;
+function animateCanvas(){
+  ctx.clearRect(0,0,W,H);
+  // Orbs
+  orbs.forEach(o=>{
+    const ox=Math.sin(t*o.sp)*80;
+    const oy=Math.cos(t*o.sp*1.3)*60;
+    const grd=ctx.createRadialGradient(
+      o.x*W+ox,o.y*H+oy,0,
+      o.x*W+ox,o.y*H+oy,o.r
+    );
+    grd.addColorStop(0,`rgba(${o.c},${o.a})`);
+    grd.addColorStop(1,`rgba(${o.c},0)`);
+    ctx.fillStyle=grd;
+    ctx.fillRect(0,0,W,H);
+  });
+  particles.forEach(p=>{p.update();p.draw();});
+  drawLines();
+  t++;
+  requestAnimationFrame(animateCanvas);
+}
+animateCanvas();
+
+/* -------- NAVBAR SCROLL -------- */
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60);
+});
+
+/* -------- REVEAL ON SCROLL -------- */
+const reveals=document.querySelectorAll('.reveal');
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('revealed');
+      // count up if stat
+      const num=e.target.querySelector('.stat-num[data-target]');
+      if(num&&!num.dataset.done){
+        num.dataset.done=1;
+        countUp(num,+num.dataset.target);
+      }
+    }
+  });
+},{threshold:.15});
+reveals.forEach(r=>io.observe(r));
+
+/* -------- COUNT UP -------- */
+function countUp(el,target){
+  let n=0,step=target/60;
+  const fn=()=>{n=Math.min(n+step,target);el.textContent=Math.floor(n)+(target===109?'%':target===48?'h':'+');if(n<target)requestAnimationFrame(fn);};
+  fn();
+}
+
+/* -------- CTA -------- */
+function handleSubmit(e){
+  e.preventDefault();
+  const v=document.getElementById('emailInput').value.trim();
+  if(!v||!v.includes('@'))return;
+  document.getElementById('cta-msg').style.display='block';
+  document.getElementById('emailInput').value='';
+}
+
+/* -------- SMOOTH STAGGER -------- */
+document.querySelectorAll('.services-grid .service-card').forEach((c,i)=>{
+  c.style.transitionDelay=(i*.07)+'s';
+});
+document.querySelectorAll('.process-step').forEach((c,i)=>{
+  c.style.transitionDelay=(i*.1)+'s';
+});
+</script>
 </body>
 </html>
